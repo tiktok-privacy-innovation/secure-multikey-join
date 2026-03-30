@@ -1,0 +1,125 @@
+load("//bazel:spu.bzl", "spu_cc_binary", "spu_cc_library", "spu_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+spu_cc_library(
+    name = "opprf",
+    srcs = ["opprf.cc"],
+    hdrs = ["opprf.h"],
+    deps = [
+        "//libspu/core:prelude",
+        "//psi/rr22:rr22_oprf",
+    ],
+)
+
+spu_cc_library(
+    name = "cuckoo_index",
+    srcs = ["cuckoo_index.cc"],
+    hdrs = ["cuckoo_index.h"],
+    linkopts = ["-lm"],
+    deps = [
+        "@com_google_absl//absl/types:span",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/rand",
+    ],
+)
+
+spu_cc_library(
+    name = "cpsi",
+    srcs = ["cpsi.cc"],
+    hdrs = ["cpsi.h"],
+    deps = [
+        ":cuckoo_index",
+        ":eqt",
+        ":opprf",
+        ":permute",
+        "//libspu/mpc/cheetah:type",
+        "//libspu/mpc/utils:ring_ops",
+    ],
+)
+
+spu_cc_library(
+    name = "eqt",
+    srcs = ["eqt.cc"],
+    hdrs = ["eqt.h"],
+    deps = [
+        "//libspu/mpc/cheetah/nonlinear:equal_prot",
+        "@yacl//yacl/link",
+    ],
+)
+
+spu_cc_library(
+    name = "benes_network",
+    srcs = ["benes_network.cc"],
+    hdrs = ["benes_network.h"],
+    deps = [
+        "//libspu/core:prelude",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
+spu_cc_library(
+    name = "permute",
+    srcs = ["permute.cc"],
+    hdrs = ["permute.h"],
+    deps = [
+        ":benes_network",
+        "//libspu/core:prelude",
+        "//libspu/mpc/cheetah/ot",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
+spu_cc_test(
+    name = "cuckoo_index_test",
+    srcs = ["cuckoo_index_test.cc"],
+    deps = [
+        ":cuckoo_index",
+        "@yacl//yacl/crypto/rand",
+    ],
+)
+
+spu_cc_test(
+    name = "opprf_test",
+    srcs = ["opprf_test.cc"],
+    deps = [
+        ":opprf",
+        "//libspu/core:ndarray_ref",
+        "//libspu/mpc/utils:ring_ops",
+        "//libspu/mpc/utils:simulate",
+    ],
+)
+
+spu_cc_test(
+    name = "cpsi_test",
+    srcs = ["cpsi_test.cc"],
+    deps = [
+        ":cpsi",
+        "//libspu/core:ndarray_ref",
+        "//libspu/core:prelude",
+        "//libspu/mpc/cheetah/nonlinear:osn_prot",
+        "//libspu/mpc/utils:ring_ops",
+        "//libspu/mpc/utils:simulate",
+        "@yacl//yacl/crypto/hash:hash_utils",
+        "@yacl//yacl/crypto/rand",
+    ],
+)
+
+spu_cc_test(
+    name = "eqt_test",
+    srcs = ["eqt_test.cc"],
+    deps = [
+        ":eqt",
+        "//libspu/mpc/utils:simulate",
+    ],
+)
+
+spu_cc_test(
+    name = "permute_test",
+    srcs = ["permute_test.cc"],
+    deps = [
+        ":permute",
+        "//libspu/mpc/utils:simulate",
+    ],
+)

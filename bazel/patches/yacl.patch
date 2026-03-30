@@ -1,0 +1,24 @@
+diff --git a/bazel/repositories.bzl b/bazel/repositories.bzl
+index 8ff1b17..1c6ec19 100644
+--- a/bazel/repositories.bzl
++++ b/bazel/repositories.bzl
+@@ -75,19 +75,6 @@ def _org_interconnection():
+         sha256 = "341f6de0fa7dd618f9723009b9cb5b1da1788aacb9e12acfb0c9b19e5c5a7354",
+     )
+ 
+-    # Add homebrew openmp for macOS, somehow..homebrew installs to different location on Apple Silcon/Intel macs.. so we need two rules here
+-    native.new_local_repository(
+-        name = "macos_omp_x64",
+-        build_file = "@yacl//bazel:local_openmp_macos.BUILD",
+-        path = "/usr/local/opt/libomp",
+-    )
+-
+-    native.new_local_repository(
+-        name = "macos_omp_arm64",
+-        build_file = "@yacl//bazel:local_openmp_macos.BUILD",
+-        path = "/opt/homebrew/opt/libomp/",
+-    )
+-
+ def _com_github_brpc_brpc():
+     maybe(
+         http_archive,

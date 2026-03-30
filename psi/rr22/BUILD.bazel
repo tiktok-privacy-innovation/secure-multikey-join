@@ -1,0 +1,81 @@
+# Copyright 2023 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@yacl//bazel:yacl.bzl", "AES_COPT_FLAGS")
+load("//bazel:spu.bzl", "spu_cc_binary", "spu_cc_library", "spu_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+spu_cc_library(
+    name = "davis_meyer_hash",
+    srcs = ["davis_meyer_hash.cc"],
+    hdrs = ["davis_meyer_hash.h"],
+    copts = AES_COPT_FLAGS,
+    deps = [
+        "@yacl//yacl/crypto/aes:aes_opt",
+        "@yacl//yacl/crypto/block_cipher:symmetric_crypto",
+        "@yacl//yacl/utils:platform_utils",
+    ],
+)
+
+spu_cc_test(
+    name = "davis_meyer_hash_test",
+    srcs = ["davis_meyer_hash_test.cc"],
+    deps = [
+        ":davis_meyer_hash",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+spu_cc_library(
+    name = "rr22_oprf",
+    srcs = ["rr22_oprf.cc"],
+    hdrs = ["rr22_oprf.h"],
+    deps = [
+        ":davis_meyer_hash",
+        ":rr22_utils",
+        "//psi/rr22/okvs:aes_crhash",
+        "//psi/rr22/okvs:baxos",
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/crypto/tools:ro",
+        "@yacl//yacl/kernel/algorithms:silent_vole",
+        "@yacl//yacl/link",
+        "@yacl//yacl/math/galois_field:gf_intrinsic",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+spu_cc_test(
+    name = "rr22_oprf_test",
+    srcs = ["rr22_oprf_test.cc"],
+    deps = [
+        ":rr22_oprf",
+    ],
+)
+
+spu_cc_library(
+    name = "rr22_utils",
+    hdrs = ["rr22_utils.h"],
+    deps = [
+        "//psi/rr22/okvs:galois128",
+        "//psi/rr22/okvs:simple_index",
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/link",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
